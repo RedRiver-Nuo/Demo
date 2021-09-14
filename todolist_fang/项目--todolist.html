@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fang_todolist</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <script src="jQuery_mini.js"></script>
+    <style>
+        * {
+            margin: 0;
+            background-color: #cdcdcd;
+        }
+        
+        body {
+            background-color: #cdcdcd;
+        }
+        
+        section {
+            width: 600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            width: 100%;
+            height: 50px;
+            background-color: rgba(47, 47, 47, 0.98);
+        }
+        
+        header section p {
+            float: left;
+            font-size: 24px;
+            color: #ddd;
+            line-height: 50px;
+            background-color: rgba(47, 47, 47, 0.98);
+        }
+        
+        header section input {
+            float: right;
+            width: 60%;
+            height: 24px;
+            margin-top: 12px;
+            text-indent: 10px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            box-shadow: 0 1px 0 rgb(255 255 255 / 24%), 0 1px 6px rgb(0 0 0 / 45%) inset;
+        }
+        
+        section h2 {
+            margin: 20px 0;
+        }
+        
+        footer {
+            text-align: center;
+            color: #666666;
+        }
+        
+        section ul,
+        section ol {
+            padding: 0;
+        }
+        
+        li {
+            position: relative;
+            list-style-type: none;
+            height: 32px;
+            line-height: 32px;
+            margin: 0 auto;
+            padding: 0 45px;
+            background-color: #ffffff;
+            border-radius: 3px;
+            margin-bottom: 10px;
+            border-left: 5px solid #629A9C;
+        }
+        
+        li input {
+            position: absolute;
+            top: 2px;
+            left: 10px;
+            height: 22px;
+            width: 22px;
+        }
+        
+        li a {
+            position: absolute;
+            top: 2px;
+            right: 10px;
+            height: 22px;
+            width: 22px;
+        }
+        
+        li a span {
+            height: 100%;
+            width: 100%;
+            background-color: #ffffff;
+            color: #666666;
+        }
+        
+        li p {
+            background-color: #ffffff;
+        }
+        
+        .glyphicon {
+            top: -1px;
+        }
+        
+        ol li {
+            position: relative;
+            list-style-type: none;
+            height: 32px;
+            line-height: 32px;
+            margin: 0 auto;
+            padding: 0 45px;
+            background-color: #e6e6e6;
+            border-radius: 3px;
+            margin-bottom: 10px;
+            border-left: 5px solid #629A9C;
+        }
+        
+        ol li p {
+            background-color: #e6e6e6;
+        }
+        
+        ol li a span {
+            height: 100%;
+            width: 100%;
+            background-color: #e6e6e6;
+            color: #666666;
+        }
+        
+        section h2 span {
+            float: right;
+            height: 33px;
+            width: 33px;
+            background-color: #fff;
+            text-align: center;
+            line-height: 33px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <section>
+            <p>ToDoList</p> <input class="int" type="text" placeholder="请输入待做事件">
+        </section>
+    </header>
+    <section>
+        <h2>正在进行 <span id="zh">0</span> </h2>
+        <ul>
+        </ul>
+        <h2>已经完成 <span id="yh">0</span></h2>
+        <ol>
+        </ol>
+    </section>
+    <footer>Copyright © 2014 todolist.cn clear</footer>
+    <script>
+        load()
+        $(".int").on("keydown", function(e) {
+                if (e.keyCode === 13) {
+                    if ($(this).val() === "") {
+                        alert('请输入待做事件')
+                    } else {
+                        //读取本地存储
+                        var local = getDate();
+                        console.log(local);
+                        //更新数据
+                        local.push({
+                            title: $(this).val(),
+                            done: false
+                        })
+                        setData(local)
+                            //渲染数据
+                        load()
+                        $(this).val("")
+                    }
+
+                }
+            })
+            //  删除
+        $("ul,ol").on("click", "a", function() {
+            var data = getDate()
+            data.splice($(this).attr("data-index"), 1)
+            console.log(data);
+            setData(data)
+                // $(this).parent().remove()
+            load()
+        })
+        $("ul,ol").on("click", "input", function() {
+            var data = getDate()
+            var index = $(this).siblings("a").attr("data-index")
+            console.log(index);
+            //修改数据
+            data[index].done = $(this).prop("checked")
+                //保存
+            setData(data)
+                //重新渲染
+            load()
+        })
+
+        function getDate() { //获取数据
+            var data = localStorage.getItem("todolist");
+            if (data !== null) {
+                return JSON.parse(data);
+            } else {
+                return [];
+            }
+        }
+
+        function setData(data) { //保存数据
+            localStorage.setItem("todolist", JSON.stringify(data))
+        }
+
+        function load() { //渲染页面
+            var data = getDate()
+            $("ul").html("")
+            $("ol").html("")
+            $.each(data, function(i, n) {
+                if (n.done == false) {
+                    $("ul").prepend("<li> <input type='checkbox'> <p>" + n.title + "</p><a href='javascript:;' data-index= " + i + "><span class='glyphicon glyphicon-euro' aria-hidden='true'></span></a> </li>")
+                } else {
+                    $("ol").prepend("<li> <input checked='checked' type='checkbox'> <p>" + n.title + "</p><a href='javascript:;' data-index= " + i + "><span class='glyphicon glyphicon-euro' aria-hidden='true'></span></a> </li>")
+                }
+            })
+            sun()
+        }
+
+        function sun() {
+            var data = getDate()
+            var item1 = 0
+            var item2 = 0
+            $.each(data, function(i, n) {
+                if (n.done) {
+                    item1++
+                } else {
+                    item2++
+                }
+            })
+            $("#yh").html(item1)
+            $("#zh").html(item2)
+        }
+    </script>
+</body>
+
+</html>
